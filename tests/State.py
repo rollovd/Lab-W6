@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from random import randint
 # from __future__ import annotations
 
 min_i, max_i = 0, 100

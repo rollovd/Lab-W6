@@ -4,6 +4,7 @@ from Person import DefaultPerson
 from Infectable import Cholera, SeasonalFluVirus, SARSCoV2
 from State import SymptomaticSick, AsymptomaticSick, Healthy
 
+#Tasks 1-2 (compulsory)
 class TestVirusSpread(unittest.TestCase):
     
     def setUp(self):
@@ -56,6 +57,59 @@ class TestVirusSpread(unittest.TestCase):
 
     	self.assertIsInstance(self._default_person_1.state, Healthy)
     	self.assertIsInstance(self._default_person_2.state, Healthy)
+
+#Task 1 (optional)
+class TestSymptoms(unittest.TestCase):
+    
+    def setUp(self):
+        age = 40
+        weight=80
+         
+        self._sick_person_flu = DefaultPerson(
+            age=age, 
+            weight=weight,
+            virus=SeasonalFluVirus(strength=1.0)
+        )
+
+        self._sick_person_cholera = DefaultPerson(
+            age=age,
+            weight=weight,
+            virus=Cholera(strength=1.0)
+        )
+        
+    @staticmethod
+    def simulation_person(person: DefaultPerson, days: int = 10, flu=True):
+        
+        characteristics = []
+        
+        for day in range(days):
+            person.day_actions()
+            person.night_actions()
+
+            day_num = day
+            temperature = person.temperature
+            water = person.water
+            
+            current_value = temperature if flu else water
+            characteristics.append(current_value)
+            
+        return characteristics
+    
+    def test_temperature_increased(self):
+        temperature = self.simulation_person(self._sick_person_flu)
+        for i in range(len(temperature) - 1):
+            current_day = temperature[i]
+            future_day = temperature[i+1]
+            
+            self.assertGreaterEqual(future_day, current_day)
+            
+    def test_water_decreased(self):
+        water = self.simulation_person(self._sick_person_cholera)
+        for i in range(len(water) - 1):
+            current_day = water[i]
+            future_day = water[i+1]
+            
+            self.assertLessEqual(future_day, current_day)
 
 if __name__ == "__main__":
 	unittest.main()
