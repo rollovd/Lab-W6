@@ -15,7 +15,11 @@ class TestVirusSpread(unittest.TestCase):
         
         self._default_person_1 = self._create_healthy_person()
         self._default_person_2 = self._create_healthy_person()
-        self._default_person_3 = self._create_healthy_person(default_position=False)       
+        self._default_person_3 = self._create_healthy_person(default_position=False)   
+
+    def tearDown(self):
+    	self._default_person_1.set_state(Healthy(self._default_person_1))
+    	self._default_person_2.set_state(Healthy(self._default_person_2))
         
     def _get_infection(self):
         infection = random.choice([Cholera(), SeasonalFluVirus(), SARSCoV2()])
@@ -43,11 +47,11 @@ class TestVirusSpread(unittest.TestCase):
         return healthy_person
     
     def test_get_infected(self): 
-    	symptomatic_interact = self._check_interaction(self._person_symptomatic, self._default_person_1)
-    	self.assertIsInstance(symptomatic_interact.state, AsymptomaticSick)
+    	symptomatic_interact_person_1 = self._check_interaction(self._person_symptomatic, self._default_person_1)
+    	self.assertIsInstance(symptomatic_interact_person_1.state, AsymptomaticSick)
 
-    	asymptomatic_interact = self._check_interaction(self._person_asymptomatic, self._default_person_2)
-    	self.assertIsInstance(asymptomatic_interact.state, AsymptomaticSick)
+    	asymptomatic_interact_person_2 = self._check_interaction(self._person_asymptomatic, self._default_person_2)
+    	self.assertIsInstance(asymptomatic_interact_person_2.state, AsymptomaticSick)
 
     	non_interact = self._check_interaction(self._person_symptomatic, self._default_person_3)
     	self.assertIsInstance(non_interact.state, Healthy)
