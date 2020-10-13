@@ -1,4 +1,3 @@
-#from Person import DepartmentOfHealth
 from abc import ABC, abstractmethod
 from random import randint
 # from __future__ import annotations
@@ -64,6 +63,7 @@ class AsymptomaticSick(State):
 
     def get_infected(self, virus): 
         other.get_infected(self.person.virus)
+
         
 class DepartmentOfHealth:
     def __init__(self):
@@ -91,6 +91,7 @@ class SymptomaticSick(State):
         
     def night_actions(self):
         # try to fight the virus
+
         self.person.fight_virus()
         if self.person.virus.strength <= 0:
             self.person.set_state(Healthy(self.person))
@@ -101,6 +102,7 @@ class SymptomaticSick(State):
     def interact(self, other): 
         other.get_infected(self.person.virus)
 
+
     def get_infected(self, virus): pass
 
 class Dead(State):
@@ -109,5 +111,3 @@ class Dead(State):
     def night_actions(self): pass
 
     def interact(self, other): pass
-
-    def get_infected(self, virus): pass

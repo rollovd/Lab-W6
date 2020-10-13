@@ -77,17 +77,78 @@ class TestVirusSpread(unittest.TestCase):
     	self.assertIsInstance(self._default_person_1.state, Healthy)
     	self.assertIsInstance(self._default_person_2.state, Healthy)
 
+
+
+#Tasks 3-4 (compulsory)
+class TestInfectedAntibodies(unittest.TestCase):
+    
+    def setUp(self):
+        self._position = (0, 0)
         
+        self._person_with_cholera_antibodies = self._create_person_with_antibodies(Cholera)
+        self._person_with_covid_antibodies = self._create_person_with_antibodies(SARSCoV2)
+        self._person_with_flu_antibodies = self._create_person_with_antibodies(SeasonalFluVirus)
+
+        self._sick_person = self._create_sick_person(random.choice([True, False]))
+        
+        self._infected_person = self._create_sick_person(False)
+
+
+    def tearDown(self):
+        self._infected_person = self._create_sick_person(False)
+
+    def _get_infection(self):
+        infection = random.choice([Cholera(), SeasonalFluVirus(), SARSCoV2()])
+        return infection
+
+    def _create_sick_person(self, symptomatic=True):
+        person = DefaultPerson(
+            home_position=self._position, 
+            virus=self._get_infection()
+        )
+        
+        _ = person.set_state(SymptomaticSick(person)) if symptomatic \
+                            else person.set_state(AsymptomaticSick(person))
+        return person
+
+    def _create_person_with_antibodies(self, antibodies_type):
+        person = DefaultPerson(
+            home_position=self._position, 
+        )
+        
+        person.antibody_types.add(antibodies_type)
+
+        return person
+    
+    def test_infected_person_and_antibodies(self):
+        self.assertIsInstance(self._person_with_cholera_antibodies.state, Healthy)
+        if isinstance(self._sick_person.virus, Cholera):
+            self._person_with_cholera_antibodies.interact(self._sick_person)
+            self.assertIsInstance(self._person_with_cholera_antibodies.state, Healthy)
+        if isinstance(self._sick_person.virus, SARSCoV2):
+            self._person_with_covid_antibodies.interact(self._sick_person)
+            self.assertIsInstance(self._person_with_covid_antibodies.state, Healthy)
+        if isinstance(self._sick_person.virus, SeasonalFluVirus):
+            self._person_with_flu_antibodies.interact(self._sick_person)
+            self.assertIsInstance(self._person_with_flu_antibodies.state, Healthy)
+
+    def test_infected_person_change_state(self):
+        for day in range(3):
+            self.assertIsInstance(self._infected_person.state, AsymptomaticSick)
+            self._infected_person.state.day_actions()
+            self._infected_person.state.night_actions()
+        self.assertIsInstance(self._infected_person.state, SymptomaticSick)
+
+        
+
+    
+
 #Tasks 5-6 (compulsory)
 class TestSymptomaticState(unittest.TestCase):
     
     def setUp(self):
         self.person = create_persons(0, 100, 0, 100, 1)
         
-    def _get_infection(self):
-        infection = random.choice([Cholera(), SeasonalFluVirus(), SARSCoV2()])
-        return infection
-    
     #test_5
     def test_healthy(self):
         virus_type = self._get_infection()
@@ -111,8 +172,7 @@ class TestSymptomaticState(unittest.TestCase):
         self.person[0].set_state(SymptomaticSick(self.person[0]))
         self.person[0].water  = self.person[0].LOWEST_WATER_PCT_TO_SURVIVE * self.person[0].weight - 1
         self.person[0].day_actions()
-        self.assertIsInstance(self.person[0].state, Dead)        
-
+        self.assertIsInstance(self.person[0].state, Dead)
         
 #Task 1 (optional)
 class TestSymptoms(unittest.TestCase):
@@ -166,6 +226,7 @@ class TestSymptoms(unittest.TestCase):
             future_day = water[i+1]
             
             self.assertLessEqual(future_day, current_day)
+
 
 #Task 3 (optional)
 class TestAntibodyState(unittest.TestCase):
