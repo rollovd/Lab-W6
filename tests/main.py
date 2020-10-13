@@ -2,7 +2,22 @@ import unittest
 import random
 from Person import DefaultPerson
 from Infectable import Cholera, SeasonalFluVirus, SARSCoV2
-from State import SymptomaticSick, AsymptomaticSick, Healthy
+from State import SymptomaticSick, AsymptomaticSick, Healthy, Dead
+
+from random import randint
+
+def create_persons(min_j, max_j, min_i, max_i, n_persons):
+    min_age, max_age = 1, 90
+    min_weight, max_weight = 30, 120
+    persons = [
+        DefaultPerson(
+            home_position=(randint(min_j, max_j), randint(min_i, max_i)),
+            age=randint(min_age, max_age),
+            weight=randint(min_weight, max_weight),
+        )
+        for i in range(n_persons)
+    ]
+    return persons
 
 #Tasks 1-2 (compulsory)
 class TestVirusSpread(unittest.TestCase):
@@ -62,6 +77,8 @@ class TestVirusSpread(unittest.TestCase):
     	self.assertIsInstance(self._default_person_1.state, Healthy)
     	self.assertIsInstance(self._default_person_2.state, Healthy)
 
+
+
 #Tasks 3-4 (compulsory)
 class TestInfectedAntibodies(unittest.TestCase):
     
@@ -79,11 +96,11 @@ class TestInfectedAntibodies(unittest.TestCase):
 
     def tearDown(self):
         self._infected_person = self._create_sick_person(False)
-        
+
     def _get_infection(self):
         infection = random.choice([Cholera(), SeasonalFluVirus(), SARSCoV2()])
         return infection
-    
+
     def _create_sick_person(self, symptomatic=True):
         person = DefaultPerson(
             home_position=self._position, 
@@ -122,6 +139,45 @@ class TestInfectedAntibodies(unittest.TestCase):
             self._infected_person.state.night_actions()
         self.assertIsInstance(self._infected_person.state, SymptomaticSick)
 
+        
+
+    
+
+#Tasks 5-6 (compulsory)
+class TestSymptomaticState(unittest.TestCase):
+    
+    def setUp(self):
+        self.person = create_persons(0, 100, 0, 100, 1)
+
+    def _get_infection(self):
+        infection = random.choice([Cholera(), SeasonalFluVirus(), SARSCoV2()])
+        return infection
+        
+    #test_5
+    def test_healthy(self):
+        virus_type = self._get_infection()
+        self.person[0].get_infected(virus_type)
+        self.person[0].set_state(SymptomaticSick(self.person[0]))
+        self.person[0].virus.strength = -1
+        self.person[0].night_actions()
+        
+        self.assertIsInstance(self.person[0].state, Healthy)
+        
+  
+    #test_6
+    def test_dead(self):
+        self.person[0].get_infected(self._get_infection())
+        self.person[0].set_state(SymptomaticSick(self.person[0]))
+        self.person[0].temperature = self.person[0].MAX_TEMPERATURE_TO_SURVIVE + 1
+        self.person[0].day_actions()
+        self.assertIsInstance(self.person[0].state, Dead)
+        self.person[0].set_state(Healthy(self.person[0]))
+        self.person[0].get_infected(Cholera())
+        self.person[0].set_state(SymptomaticSick(self.person[0]))
+        self.person[0].water  = self.person[0].LOWEST_WATER_PCT_TO_SURVIVE * self.person[0].weight - 1
+        self.person[0].day_actions()
+        self.assertIsInstance(self.person[0].state, Dead)
+        
 #Task 1 (optional)
 class TestSymptoms(unittest.TestCase):
     
@@ -175,5 +231,27 @@ class TestSymptoms(unittest.TestCase):
             
             self.assertLessEqual(future_day, current_day)
 
+
+#Task 3 (optional)
+class TestAntibodyState(unittest.TestCase):
+    
+    def setUp(self):
+        self.person = create_persons(0, 100, 0, 100, 1)
+        
+    def _get_infection(self):
+        infection = random.choice([Cholera(), SeasonalFluVirus(), SARSCoV2()])
+        return infection
+    
+    def test_antibody(self):
+        virus_type = self._get_infection()
+        self.person[0].get_infected(virus_type)
+        self.person[0].set_state(SymptomaticSick(self.person[0]))
+        virus_type_prove = self.person[0].virus.get_type()
+        self.person[0].virus.strength = -1
+        self.person[0].night_actions()
+        antibody = self.person[0].antibody_types
+        assert virus_type_prove in antibody, "No antibody to virus type {}".format(virus_type_prove)            
+
+        
 if __name__ == "__main__":
 	unittest.main()

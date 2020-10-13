@@ -111,4 +111,6 @@ class CommunityPerson(Person):
             self.virus.cause_symptoms(self)
 
     def set_state(self, state):
+
         self.state = state
+

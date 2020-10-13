@@ -64,13 +64,26 @@ class AsymptomaticSick(State):
     def get_infected(self, virus): 
         other.get_infected(self.person.virus)
 
+        
+class DepartmentOfHealth:
+    def __init__(self):
+        pass
+    
+    def monitor_situation(self):
+        pass
+    
+    def issue_policy(self):
+        pass
+    
+    def hospitalize(self, person):
+        pass
 
 class SymptomaticSick(State):
     def day_actions(self):
         self.person.progress_disease()
         
         if self.person.is_life_threatening_condition():
-            # health_dept = DepartmentOfHealth()
+            health_dept = DepartmentOfHealth()
             health_dept.hospitalize(self.person)
 
         if self.person.is_life_incompatible_condition():
@@ -78,7 +91,8 @@ class SymptomaticSick(State):
         
     def night_actions(self):
         # try to fight the virus
-        self.person.fightvirus()
+
+        self.person.fight_virus()
         if self.person.virus.strength <= 0:
             self.person.set_state(Healthy(self.person))
             self.person.antibody_types.add(self.person.virus.get_type())
@@ -88,4 +102,14 @@ class SymptomaticSick(State):
     def interact(self, other): 
         other.get_infected(self.person.virus)
 
+
     def get_infected(self, virus): pass
+
+class Dead(State):
+    def day_actions(self): pass
+
+    def night_actions(self): pass
+
+    def interact(self, other): pass
+
+    def get_infected(self, other): pass
