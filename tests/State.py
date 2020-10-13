@@ -111,3 +111,5 @@ class Dead(State):
     def night_actions(self): pass
 
     def interact(self, other): pass
+
+    def get_infected(self, other): pass
