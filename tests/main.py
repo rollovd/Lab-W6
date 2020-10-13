@@ -82,13 +82,15 @@ class TestVirusSpread(unittest.TestCase):
 class TestSymptomaticState(unittest.TestCase):
     
     def setUp(self):
-        self.person = create_persons(0, 100, 0, 100, 1) #someone from our city(100x100)
+        self.person = create_persons(0, 100, 0, 100, 1)
         
+    def _get_infection(self):
+        infection = random.choice([Cholera(), SeasonalFluVirus(), SARSCoV2()])
+        return infection
+    
     #test_5
-
     def test_healthy(self):
-        
-        virus_type = SARSCoV2(strength=2.0)
+        virus_type = self._get_infection()
         self.person[0].get_infected(virus_type)
         self.person[0].set_state(SymptomaticSick(self.person[0]))
         self.person[0].virus.strength = -1
@@ -98,10 +100,8 @@ class TestSymptomaticState(unittest.TestCase):
         
   
     #test_6
-    
     def test_dead(self):
-
-        self.person[0].get_infected(SARSCoV2())
+        self.person[0].get_infected(self._get_infection())
         self.person[0].set_state(SymptomaticSick(self.person[0]))
         self.person[0].temperature = self.person[0].MAX_TEMPERATURE_TO_SURVIVE + 1
         self.person[0].day_actions()
@@ -171,19 +171,21 @@ class TestSymptoms(unittest.TestCase):
 class TestAntibodyState(unittest.TestCase):
     
     def setUp(self):
-        self.person = create_persons(0, 100, 0, 100, 1) #someone from our city(100x100)
+        self.person = create_persons(0, 100, 0, 100, 1)
         
+    def _get_infection(self):
+        infection = random.choice([Cholera(), SeasonalFluVirus(), SARSCoV2()])
+        return infection
+    
     def test_antibody(self):
-        
-        
-        virus_type = SARSCoV2(strength=2.0)
+        virus_type = self._get_infection()
         self.person[0].get_infected(virus_type)
         self.person[0].set_state(SymptomaticSick(self.person[0]))
         virus_type_prove = self.person[0].virus.get_type()
         self.person[0].virus.strength = -1
         self.person[0].night_actions()
         antibody = self.person[0].antibody_types
-        assert virus_type_prove in antibody, "Antibody from virus type {} was not added".format(virus_type_prove)            
+        assert virus_type_prove in antibody, "No antibody to virus type {}".format(virus_type_prove)            
 
         
 if __name__ == "__main__":
