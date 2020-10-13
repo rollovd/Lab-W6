@@ -148,6 +148,10 @@ class TestSymptomaticState(unittest.TestCase):
     
     def setUp(self):
         self.person = create_persons(0, 100, 0, 100, 1)
+
+    def _get_infection(self):
+        infection = random.choice([Cholera(), SeasonalFluVirus(), SARSCoV2()])
+        return infection
         
     #test_5
     def test_healthy(self):
